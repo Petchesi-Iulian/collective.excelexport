@@ -1,3 +1,4 @@
+from copy import deepcopy
 from zope.interface import Interface
 from zope.component import adapts
 from datetime import datetime
@@ -19,7 +20,12 @@ class FolderContentsDataSource(BaseContentsDataSource):
 
     def get_objects(self):
         catalog = api.portal.get_tool('portal_catalog')
-        brains = catalog.searchResults(REQUEST=self.request,
-                                       path={'query': '/'.join(self.context.getPhysicalPath()),
-                                             'depth': 1})
+
+        query = deepcopy(self.request.form)
+        query.pop('excelexport.policy', None)
+        brains = catalog.searchResults(**query)
+
+        # brains = catalog.searchResults(REQUEST=self.request,
+        #                                path={'query': '/'.join(self.context.getPhysicalPath()),
+        #                                      'depth': 1})
         return [b.getObject() for b in brains]
